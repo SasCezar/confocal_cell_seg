@@ -1,0 +1,30 @@
+data:
+    input_dir: ./data/tiff/
+    output_dir: ./data/out/
+
+segmentation:
+    min_voxels: 100
+    morphology:
+        open_radius: 1
+        close_radius: 0
+    markers:
+        h: .75
+
+    watershed:
+        compactness: 0.5
+
+runtime:
+    log_level: INFO
+
+visualization:
+    enable: False
+    layers:
+        ["markers", "mask_otsu", "mask_small_removed", "labels", "density_prob"]
+
+export:
+    enable: True
+    layers: ["mask_small_removed", "density_prob"] # Centroids aka markers are always exported
+
+convert:
+    lif_dir: ./data/lif/
+    tiff_out: ./data/tiff/
