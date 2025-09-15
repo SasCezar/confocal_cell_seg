@@ -46,7 +46,7 @@ def run(config: Path = typer.Option(..., "--config", "-c", help="Path to config.
 
         csv_out = out_dir / "centroids" / f"{input.stem}.csv"
         csv_out.parent.mkdir(parents=True, exist_ok=True)
-        df.to_csv(csv_out)
+        df.to_csv(csv_out, index=False)
         if cfg.export.enable:
             logging.info("Creating layers dump")
             dump(stages=stages, keys=cfg.export.layers, image_name=input.stem, out_dir=out_dir, spacing=metadata.spacing)
