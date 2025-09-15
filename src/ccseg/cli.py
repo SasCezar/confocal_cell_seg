@@ -48,8 +48,8 @@ def run(config: Path = typer.Option(..., "--config", "-c", help="Path to config.
         csv_out.parent.mkdir(parents=True, exist_ok=True)
         df.to_csv(csv_out)
         if cfg.export.enable:
-            logging.info("Creating layers dumb")
-            dump(stages=stages, keys=cfg.export.layers, image_name=input.stem, out_dir=out_dir)
+            logging.info("Creating layers dump")
+            dump(stages=stages, keys=cfg.export.layers, image_name=input.stem, out_dir=out_dir, spacing=metadata.spacing)
 
         if cfg.visualization.enable:
             logging.info("Visualization")

@@ -22,7 +22,7 @@ class TiffImageReader(ImageReader):
             channels = [arr[i] for i in range(c)]
             return channels, meta
 
-    # -------------------- voxel size helpers --------------------
+    # voxel size helpers
     def _voxel_size_um(self, tif: TiffFile):
         """Return (dz, dy, dx) in microns if available; None for missing axes."""
         # 1) OME-TIFF (gold standard)
