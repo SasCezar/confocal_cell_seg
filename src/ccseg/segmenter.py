@@ -178,13 +178,13 @@ def segment_3d(
     collect_img("volume", vol, colormap="gray", opacity=0.85)
 
     bw, th = binarize_otsu(vol)
-    collect_img("mask_otsu", bw, colormap="gray")
+    collect_img("mask_otsu", bw.astype(np.uint8, copy=False), colormap="gray")
 
     bw_morph = apply_morphology(bw, open_radius=cfg.morphology.open_radius, close_radius=cfg.morphology.close_radius)
-    collect_img("mask_morph", bw_morph, colormap="gray")
+    collect_img("mask_morph", bw_morph.astype(np.uint8, copy=False), colormap="gray")
 
     bw_clean = remove_small(bw_morph, cfg.min_voxels)
-    collect_img("mask_small_removed", bw_clean, colormap="gray")
+    collect_img("mask_small_removed", bw_clean.astype(np.uint8, copy=False), colormap="gray")
 
     spacing: Tuple[float, float, float] = metadata.spacing  # (dz, dy, dx)
     distance = compute_distance(bw_clean, spacing)
@@ -194,7 +194,7 @@ def segment_3d(
 
     labels_raw = run_watershed(
         distance=distance, markers=markers, mask=bw_clean, compactness=cfg.watershed.compactness
-    )
+    ).astype(np.int32, copy=False)
     collect_labels("labels_raw", labels_raw, blending="translucent")
 
     labels = clean_and_relabel(labels_raw, cfg.min_voxels)

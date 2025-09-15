@@ -19,10 +19,8 @@ def dump(stages: Dict[str, Any], keys: Optional[Iterable[str]], image_name: str,
         else:
             kind, data, kwargs = _infer_from_array(name, np.asarray(obj))
 
-        if data.dtype == np.bool_:
-            data = data.astype(np.uint8) * 255
-        elif data.dtype not in (np.uint8, np.uint16, np.float32):
-            data = data.astype(np.float32)
+        data = data.astype(np.float32)
+
         out_path = out_dir / name / f"{image_name}.tif"
         out_path.parent.mkdir(parents=True, exist_ok=True)
         logging.info(f"Saving layer {name} - Kind {kind} - data shape {data.shape}")

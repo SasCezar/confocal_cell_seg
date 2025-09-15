@@ -17,7 +17,7 @@ class TiffImageReader(ImageReader):
             dz, dy, dx = self._voxel_size_um(tif)
             c = arr.shape[0]
             z = arr.shape[1]
-            meta = Metadata(dx=dx, dy=dy, dz=dz, slices=z, channels=c, name="")
+            meta = Metadata(dx=dx, dy=dy, dz=abs(dz), slices=z, channels=c, name="")
 
             channels = [arr[i] for i in range(c)]
             return channels, meta
