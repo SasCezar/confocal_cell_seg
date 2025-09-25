@@ -37,7 +37,7 @@ def run(config: Path = typer.Option(..., "--config", "-c", help="Path to config.
         reader = ImageReaderFactory().get_reader(input)
         channels, metadata = reader.read(input)
         if not channels:
-            logging.info(f"Skippint image {input} - Not enough channels.")
+            logging.info(f"Skippint image {input} - Improper image {metadata} expected CZYX or ZYX.")
             continue
 
         logging.info(f"Image metadata {metadata} - Shape channel 0 {channels[0].shape}")

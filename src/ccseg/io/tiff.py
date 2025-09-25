@@ -5,20 +5,47 @@ import xml.etree.ElementTree as ET
 
 from tifffile import TiffFile
 from ccseg.io.base import ImageReader, Metadata
+import numpy as np
 
 
 class TiffImageReader(ImageReader):
     def read(self, filepath):
         with TiffFile(filepath) as tif:
-            arr = tif.asarray()  # raw array (z, c, y, x)
-            if len(arr.shape) < 4:
-                return [], {}
-            arr = arr.transpose(1, 0, 2, 3)
+            s = tif.series[0]
+            axes = s.axes  # expected among: 'ZCYX', 'CYX', 'ZYX', 'YX', 'TZCYX', ...
+            arr = s.asarray()
+
+            # Require a real Z-stack
+            if "Z" not in axes:
+                return [], {'axes': axes}
+            zsize = arr.shape[axes.index("Z")]
+            if zsize <= 1:
+                return [], {"axes": axes}
+
+            # Bring to (C, Z, Y, X); synthesize C=1 if missing
+            order_axes = [a for a in "CZYX" if a in axes]
+            if not {"Y", "X"}.issubset(set(order_axes)):
+                return [], {"axes": axes}  # not a planar image
+
+            arr = np.transpose(arr, [axes.index(a) for a in order_axes])
+            # Now arr has axes == order_axes
+            if "C" not in order_axes:
+                arr = arr[np.newaxis, ...]  # add C=1 at front
+                order_axes = ["C"] + order_axes
+
+            # Ensure final layout is exactly (C,Z,Y,X)
+            # (Z is guaranteed to exist; we already checked)
+            want = ["C", "Z", "Y", "X"]
+            if order_axes != want:
+                # Reorder if needed (usually it's already correct)
+                idx = [order_axes.index(a) for a in want]
+                arr = np.transpose(arr, idx)
+
+            c, z, y, x = arr.shape
             dz, dy, dx = self._voxel_size_um(tif)
-            c = arr.shape[0]
-            z = arr.shape[1]
             meta = Metadata(dx=dx, dy=dy, dz=abs(dz), slices=z, channels=c, name="")
 
+            # Return list of C arrays, each (Z, Y, X)
             channels = [arr[i] for i in range(c)]
             return channels, meta
 
