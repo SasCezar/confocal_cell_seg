@@ -31,4 +31,8 @@ packages = ["src/ccseg"]
 
 
 [tool.hatch.build.targets.sdist]
-include = ["src/cellseg3d", "pyproject.toml"]
+include = ["src/ccseg", "pyproject.toml"]
+
+
+[project.scripts]
+ccseg = "ccseg.cli:main"

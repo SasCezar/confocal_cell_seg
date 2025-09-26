@@ -49,7 +49,9 @@ def run(config: Path = typer.Option(..., "--config", "-c", help="Path to config.
         df.to_csv(csv_out, index=False)
         if cfg.export.enable:
             logging.info("Creating layers dump")
-            dump(stages=stages, keys=cfg.export.layers, image_name=input.stem, out_dir=out_dir, spacing=metadata.spacing)
+            dump(
+                stages=stages, keys=cfg.export.layers, image_name=input.stem, out_dir=out_dir, spacing=metadata.spacing
+            )
 
         if cfg.visualization.enable:
             logging.info("Visualization")
@@ -70,5 +72,33 @@ def convert(config: Path = typer.Option(..., "--config", "-c", help="Path to con
             lif_image_to_imagej_tiff_raw(img=img, out_path=file_out)
 
 
-if __name__ == "__main__":
+@app.command()
+def single(
+    config: Path = typer.Option(..., "--config", "-c", help="Path to convert config.yaml"),
+    input: Path = typer.Option(..., "--file", "-f", help="Path to file"),
+):
+    cfg = Settings.from_yaml(config)
+    setup_logging(cfg.runtime.log_level)
+
+    logging.info(f"Processing image {input}")
+    reader = ImageReaderFactory().get_reader(input)
+    channels, metadata = reader.read(input)
+
+    if not channels:
+        logging.info(f"Skippint image {input} - Improper image {metadata} expected CZYX or ZYX.")
+        return 0
+
+    logging.info(f"Image metadata {metadata} - Shape channel 0 {channels[0].shape}")
+
+    _, stages = segment_3d(cfg=cfg.segmentation, channels=channels, metadata=metadata)
+
+    logging.info("Visualization")
+    visualize(stages=stages, keys=cfg.visualization.layers)
+
+
+def main() -> None:
     app()
+
+
+if __name__ == "__main__":
+    main()
